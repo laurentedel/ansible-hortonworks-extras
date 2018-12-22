@@ -20,31 +20,8 @@
 #      body_format: json
 #    shell: "curl -i -u admin:admin -H 'X-Requested-By: ambari'  -X PUT  -d '\{'RequestInfo':\{'context':'_PARSE_.STOP.ALL_SERVICES','operation_level':\{'level':'CLUSTER','cluster_name':'Sandbox'\}\},'Body':\{'ServiceInfo':\{'state':'INSTALLED'\}\}\}'  
 #    run_once: true
-  - name: cleanup
+  - name: ambari-agent cleanup
     shell: PYTHONPATH=/usr/lib/ambari-agent/lib:/usr/lib/ambari-server/lib /usr/lib/ambari-agent/lib/ambari_agent/HostCleanup.py --silent --skip=users
-    ignore_errors: true
-
-  - name: remove packages
-    shell: "yum remove -y {{ item }}"
-    with_items:
-      - hive\*
-      - oozie\*
-      - pig\*
-      - zookeeper\*
-      - tez\*
-      - hbase\*
-      - ranger\*
-      - knox\*
-      - storm\*
-      - accumulo\*
-      - falcon\*
-      - ambari-metrics-hadoop-sink 
-      - smartsense-hst
-      - slider\*
-      - ambari-\*
-      - spark2\*
-      - spark_\*-yarn-shuffle
-      - ambari-infra-solr-client
     ignore_errors: true
 
   - name: stop services
@@ -57,13 +34,34 @@
     ignore_errors: true
 
   - name: remove packages
-    yum: 
-     state: absent
-     pkg: "{{ item }}"
-    with_items:
-      - ambari-agent
-      - ambari-server
-      - ambari-metrics\*
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - hive\*
+      - oozie\*
+      - pig\*
+      - zookeeper\*
+      - tez\*
+      - hbase\*
+      - ranger\*
+      - knox\*
+      - storm\*
+      - accumulo\*
+      - falcon\*
+      - ambari-metrics-hadoop-sink
+      - smartsense-hst
+      - slider\*
+      - ambari-\*
+      - spark2\*
+      - spark_\*-yarn-shuffle
+      - ambari-infra-solr-client
+      - ambari-agent.x86_64
+      - ambari-metrics-collector.x86_64
+      - ambari-metrics-grafana.x86_64
+      - ambari-metrics-monitor.x86_64
+      - ambari-infra-solr.noarch
 
   - name: remove files
     file:
@@ -125,6 +123,9 @@
     - /var/lib/storm
     - /var/lib/storm
     - /var/lib/storm
+    - /var/log/ambari-
+    - /var/log/hive*
+    - /var/log/spark*
     ignore_errors: true
 
   - name: remove database
